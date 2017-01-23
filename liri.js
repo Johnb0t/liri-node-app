@@ -8,7 +8,7 @@
 
 // movie-this
 
-// do-what-it-says
+// do-what-it-saysqqq
 
 // What Each Command Should Do
 
@@ -167,15 +167,15 @@ if (command == "movie-this"){
 Req(ombdURL, function (error, response, body) {
   if (!error && response.statusCode == 200) {
   	body= JSON.parse(body)// string
-  	console.log(body.Title);
-	console.log(body.Year);
-	console.log(body.Rated);
-	console.log(body.Country);
-	console.log(body.Language);
-	console.log(body.Plot);
-	console.log(body.Actors);
-	console.log(body.tomatoRating);
-	console.log(body.tomatoURL); 
+  	console.log("Title: " + body.Title);
+	console.log("Year: " + body.Year);
+	console.log("Rating: " + body.Rated);
+	console.log("Country: " + body.Country);
+	console.log("Language: " + body.Language);
+	console.log("Basic Plot: " + body.Plot);
+	console.log("Cast: " + body.Actors);
+	console.log("Rotten Tomato Rating: " + body.tomatoRating);
+	console.log("Rotten Tomato URL: " + body.tomatoURL); 
    // body = body.replace('{', '');
     // var MovieArr = body.split(',');
     // console.log(MovieArr[0]);// returns a string 
