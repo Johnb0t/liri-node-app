@@ -1,68 +1,8 @@
-// At the top of the liri.js file, write the code you need to grab the data from keys.js. Then store the keys in a variable.
-
-// Make it so liri.js can take in one of the following commands:
-
-// my-tweets
-
-// spotify-this-song
-
-// movie-this
-
-// do-what-it-saysqqq
-
-// What Each Command Should Do
-
-// node liri.js my-tweets
-
-// This will show your last 20 tweets and when they were created at in your terminal/bash window.
-// node liri.js spotify-this-song '<song name here>'
-
-// This will show the following information about the song in your terminal/bash window
-
-// Artist(s)
-// The song's name
-// A preview link of the song from Spotify
-// The album that the song is from
-// if no song is provided then your program will default to
-
-// "The Sign" by Ace of Base
-// node liri.js movie-this '<movie name here>'
-
-// This will output the following information to your terminal/bash window:
-
-// Title of the movie.
-// Year the movie came out.
-// IMDB Rating of the movie.
-// Country where the movie was produced.
-// Language of the movie.
-// Plot of the movie.
-// Actors in the movie.
-// Rotten Tomatoes Rating.
-// Rotten Tomatoes URL.
-// If the user doesn't type a movie in, the program will output data for the movie 'Mr. Nobody.'
-
-// If you haven't watched "Mr. Nobody," then you should: http://www.imdb.com/title/tt0485947/
-// It's on Netflix!
-// node liri.js do-what-it-says
-
-// Using the fs Node package, LIRI will take the text inside of random.txt and then use it to call one of LIRI's commands.
-// It should run spotify-this-song for "I Want it That Way," as follows the text in random.txt.
-// Feel free to change the text in that document to test out the feature for other commands.
-// BONUS
-
-// In addition to logging the data to your terminal/bash window, output the data to a .txt file called log.txt.
-
-// Make sure you append each command you run to the log.txt file.
-
-// Do not overwrite your file each time you run a command.
-
-
-// enable node fs
 var fs = require('fs'); 
 
 var Twitter = require('twitter');
 var spotify = require('spotify');
-var Req = require('request');
+var request = require('request');
 
 var Tkeys = require('./keys.js');
 var	STkeys = Tkeys.twitterKeys
@@ -70,15 +10,8 @@ var	STkeys = Tkeys.twitterKeys
 // first input after file is operation to perform
 var command = process.argv[2]; 
 
-var request;
-var requestArr = [];
-
-if (process.argv.length == 4){
-	request = process.argv[3];
-	}
-else{
-	joinInputs();
-}
+var userRequest;
+var requestArray = [];
 
 // validate commands and log appropriately
 if (command == "my-tweets" || command =="spotify-this-song" 
@@ -90,7 +23,18 @@ if (command == "my-tweets" || command =="spotify-this-song"
 else{
 	 console.log("invalid selection");
 	 logCommand("errorlog.txt", command);
-	 }
+}
+
+// if statement for process.argv with length of 4
+if (process.argv.length == 4) {
+    userRequest = process.argv[3];
+}
+else {
+    for (var i = 3; i < process.argv.length; i++) {
+        requestArray.push(process.argv[i]);
+    };
+    userRequest = requestArray.join(" ");
+};
 
 // handle twitter command
 if (command == "my-tweets"){
@@ -110,106 +54,83 @@ if (command == "my-tweets"){
 		});
 }
 
-function spotifySong(){
-	spotify.search({ type: 'track', query: request }, function(err, data) {
-	    if ( err ) {
-	        console.log('Error occurred: ' + err);
-	        return;
-	    }
-	    	console.log(data.tracks.items[0].artists);
-
-	// Artist(s)
-	// The song's name
-	// A preview link of the song from Spotify
-	// The album that the song is from
-
-
-	});
-}
-
-
-
-if (command =="spotify-this-song"){
-
-	if (request == undefined ){
-		spotify.search({ type: 'track', query: "The Sign" }, function(err, data) {
-		    if ( err ) {
-		        console.log('Error occurred: ' + err);
-		        return;
-		    }
-		    	//console.log(data);
-		    	console.log("Artist: " + data.tracks.items[0].artists[0].name);
-		    	console.log("Song: " + data.tracks.items[0].name);
-		    	console.log("Album: " + data.tracks.items[0].album.name)
-		    	console.log("URL: " + data.tracks.items[0].artists[0].external_urls.spotify);
-		});
-	} else {
-		spotify.search({ type: 'track', query: request }, function(err, data) {
-		    if ( err ) {
-		        console.log('Error occurred: ' + err);
-		        return;
-		    }
-		    	//console.log(data);
-		    	console.log("Artist: " + data.tracks.items[0].artists[0].name);
-		    	console.log("Song: " + data.tracks.items[0].name);
-		    	console.log("Album: " + data.tracks.items[0].album.name)
-		    	console.log("URL: " + data.tracks.items[0].artists[0].external_urls.spotify);
-		});
-	}
-}
-
-if (command == "movie-this"){
-// node liri.js movie-this '<movie name here>'
-	var ombdURL = "http://www.omdbapi.com/?t=";
-	ombdURL += request;
-	ombdURL += "&y=&plot=short&tomatoes=true&r=json";
-	
-Req(ombdURL, function (error, response, body) {
-  if (!error && response.statusCode == 200) {
-  	body= JSON.parse(body)// string
-  	console.log("Title: " + body.Title);
-	console.log("Year: " + body.Year);
-	console.log("Rating: " + body.Rated);
-	console.log("Country: " + body.Country);
-	console.log("Language: " + body.Language);
-	console.log("Basic Plot: " + body.Plot);
-	console.log("Cast: " + body.Actors);
-	console.log("Rotten Tomato Rating: " + body.tomatoRating);
-	console.log("Rotten Tomato URL: " + body.tomatoURL); 
-   // body = body.replace('{', '');
-    // var MovieArr = body.split(',');
-    // console.log(MovieArr[0]);// returns a string 
-  }
-})
+// function to retrieve song info
+function songInfo(songName) {
+    console.log("Searching for: " + songName.toUpperCase());
+    spotify.search({type: "track", query: songName}, function(err, data) {
+        if (err) {
+            console.log("Error: " + err);
+            log("error_log.txt", command + " Error: " + err);
+            return;
+        } else {
+            for (var i = 0; i < data.tracks.items.length; i++) {
+                console.log("--------------------------------------------------------------------");
+                console.log("Artist: " + data.tracks.items[i].artists[0].name);
+                console.log("Song Name: " + data.tracks.items[i].name);
+                console.log("Album: " + data.tracks.items[i].album.name);
+                console.log("Preview Link: " + data.tracks.items[i].external_urls.spotify + "\n");
+            };
+        };
+    });
+};
 
 
- 
+// function to retrieve movie info
+function movieInfo(movieURL) {
+    request(movieURL, function(err, response, body) {
+        if (!err && response.statusCode == 200) {
+            //convert body to string
+            body = JSON.parse(body);
+            console.log("Title: " + body.Title);
+            console.log("Year: " + body.Year);
+            console.log("Rating: " + body.Rated);
+            console.log("Country: " + body.Country);
+            console.log("Language: " + body.Language);
+            console.log("Plot: " + body.Plot);
+            console.log("Cast: " + body.Actors);
+            console.log("Rotten Tomatoes Rating: " + body.tomatoRating);
+            console.log("Rotten Tomatoes URL: " + body.tomatoURL);
+        } else {
+            log("error_log.txt", command + " Error: " + err);
+            return;
+        };
+    });
+};
+
+if (command == "spotify-this-song") {
+    if (userRequest == "") {
+        userRequest = "The Sign";
+        songInfo(userRequest);
+    } else {
+        songInfo(userRequest);
+    };
+};
+
+if (command == "movie-this") {
+    // initialize var to hold omdbURL
+    var omdbURL;
+
+    if (userRequest == "") {
+        omdbURL = "http://www.omdbapi.com/?t=mr.nobody&y=&plot=short&tomatoes=true&r=json";
+        movieInfo(omdbURL);
+    } else {
+        omdbURL = "http://www.omdbapi.com/?t=" + userRequest + "&y=&plot=short&tomatoes=true&r=json";
+        movieInfo(omdbURL);
+    };
+};
+
 // If the user doesn't type a movie in, the program will output data for the movie 'Mr. Nobody.'
-
-}
 
 if (command == "do-what-it-says"){
 
 	fs.readFile("random.txt", "utf8", function(err, data) {
 	  	console.log(data);
 		var randomArr = data.split(',');
-			command = randomArr[0];
-			request = randomArr[1];
-
-	  	// spotify-this-song,"I Want it That Way"
+			userRequest = randomArr[1];
+			songInfo(userRequest);
 	});
 		
 }
-
-///////////////////////////////////////////////////////////
-//functions
-
-function joinInputs() {
-	for (var i = 3; i < process.argv.length; i++) {	
-			requestArr.push(process.argv[i]);
-			request = requestArr.join(' ');
-		}
-	}
 
 // function to handle logging all input operations
 // valid commands are sent to log.txt, invalid commands sent to errorlog.txt
